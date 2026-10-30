@@ -1,0 +1,31 @@
+# djinqSort made by djinq
+
+# default sorting mode ~ used until a player chooses their own
+default-mode: CATEGORY
+
+# reverse the selected sorting mode by default
+reverse-order: false
+
+# player inventory sorting ~ main storage only
+# hotbar, armor and offhand stay untouched
+player-inventory:
+  enabled: true
+
+# containers that can be sorted with shift + right-click or shortcuts
+containers:
+  chest: true
+  barrel: true
+  shulker-box: true
+  hopper: true
+  dropper: true
+  dispenser: true
+
+# click shortcuts ~ permissions are still required
+triggers:
+  middle-click: true
+  container-shift-right-click: true
+
+# join hint ~ sent only to players with container permission
+join-hint:
+  enabled: true
+  delay-seconds: 120
