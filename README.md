@@ -1,3 +1,5 @@
+<img width="1024" height="162" alt="djinqSort" src="https://github.com/user-attachments/assets/e7aefd03-a4f4-4156-84f4-4266fd9bf893" />
+
 # djinqSort
 
 A small and lightweight inventory sorting plugin for Paper servers.
