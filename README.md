@@ -1,5 +1,3 @@
-<img width="1024" height="162" alt="djinqSort" src="https://github.com/user-attachments/assets/2016ee85-7216-4015-8ed2-d39dccd762d7" />
-
 # djinqSort
 
 A small and lightweight inventory sorting plugin for Paper servers.
@@ -46,6 +44,4 @@ In `config.yml`, you can edit:
 
 `messages.yml` contains one `prefix` setting. It is automatically added to command messages, while click sorting stays quiet.
 
-Targets Paper 1.21.11 through 26.3. Use Java 21 for Paper 1.21.11, or Java 25 for Paper 26.1+.
-
-Compiled against Paper 1.21.11. Test newer Paper versions on a real server before using them in production.
+Built for Paper 1.21.11 through 26.3. Use Java 21 for Paper 1.21.11, or Java 25 for Paper 26.1+.
