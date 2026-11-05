@@ -1,11 +1,8 @@
-<img width="1024" height="162" alt="djinqSort" src="https://github.com/user-attachments/assets/4cff0664-5c7d-4c17-9227-279d5460c0ab" />
-
-
 # djinqSort
 
 A small and lightweight inventory sorting plugin for Paper servers.
 
-Sort your main inventory with commands, or supported containers with Shift + right-click or middle-click. Sorting keeps item metadata intact and never touches your hotbar, armor, or offhand.
+Sort the 27 main inventory slots with commands, or sort an open supported container with middle-click. You can also sort supported containers with Shift + right-click. Sorting keeps item metadata intact and never touches the 9 hotbar slots, armor, or offhand.
 
 Made by djinq ~ [djinq.dev](https://djinq.dev)
 
