@@ -26,7 +26,8 @@ public final class DjinqSort extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        saveResource("messages.yml", false);
+        ResourceMigration.mergeMissingDefaults(this, "config.yml");
+        ResourceMigration.mergeMissingDefaults(this, "messages.yml");
         reloadPlugin();
 
         SortCommand command = new SortCommand(this);
