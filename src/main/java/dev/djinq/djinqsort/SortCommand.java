@@ -75,8 +75,7 @@ public final class SortCommand implements CommandExecutor, TabCompleter {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
-        plugin.reloadPlugin();
-        plugin.messages().send(sender, "reload-success");
+        plugin.messages().send(sender, plugin.reloadPlugin() ? "reload-success" : "reload-failed");
         return true;
     }
 

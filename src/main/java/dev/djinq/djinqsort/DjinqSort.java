@@ -28,7 +28,11 @@ public final class DjinqSort extends JavaPlugin {
         saveDefaultConfig();
         ResourceMigration.mergeMissingDefaults(this, "config.yml");
         ResourceMigration.mergeMissingDefaults(this, "messages.yml");
-        reloadPlugin();
+        messages = new MessageManager(this);
+        if (!reloadPlugin()) {
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         SortCommand command = new SortCommand(this);
         PluginCommand sort = Objects.requireNonNull(getCommand("sort"));
@@ -40,19 +44,35 @@ public final class DjinqSort extends JavaPlugin {
                         + "<#CACACA>| <#B3E342>djinq.dev <#CACACA>| <#B3E342>Loaded"));
     }
 
-    public void reloadPlugin() {
-        reloadConfig();
-        messages = new MessageManager(this);
-        defaultMode = SortMode.parse(getConfig().getString("default-mode", "CATEGORY"));
-        if (defaultMode == null || defaultMode == SortMode.REVERSE) {
-            defaultMode = SortMode.CATEGORY;
+    public boolean reloadPlugin() {
+        try {
+            reloadConfig();
+            SortMode nextDefaultMode = SortMode.parse(getConfig().getString("default-mode", "CATEGORY"));
+            if (nextDefaultMode == null || nextDefaultMode == SortMode.REVERSE) {
+                nextDefaultMode = SortMode.CATEGORY;
+            }
+            boolean nextPlayerInventoryEnabled = getConfig().getBoolean("player-inventory.enabled", true);
+            boolean nextMiddleClickEnabled = getConfig().getBoolean("triggers.middle-click", false);
+            boolean nextContainerShiftClickEnabled = getConfig().getBoolean("triggers.container-shift-right-click", true);
+            boolean nextJoinHintEnabled = getConfig().getBoolean("join-hint.enabled", true);
+            long nextJoinHintDelayTicks = Math.max(0L, getConfig().getLong("join-hint.delay-seconds", 120L)) * 20L;
+            boolean nextDefaultReverseOrder = getConfig().getBoolean("reverse-order", false);
+            if (!messages.reload()) {
+                return false;
+            }
+
+            defaultMode = nextDefaultMode;
+            playerInventoryEnabled = nextPlayerInventoryEnabled;
+            middleClickEnabled = nextMiddleClickEnabled;
+            containerShiftClickEnabled = nextContainerShiftClickEnabled;
+            joinHintEnabled = nextJoinHintEnabled;
+            joinHintDelayTicks = nextJoinHintDelayTicks;
+            defaultReverseOrder = nextDefaultReverseOrder;
+            return true;
+        } catch (RuntimeException exception) {
+            getLogger().severe("Could not reload djinqSort configuration: " + exception.getMessage());
+            return false;
         }
-        playerInventoryEnabled = getConfig().getBoolean("player-inventory.enabled", true);
-        middleClickEnabled = getConfig().getBoolean("triggers.middle-click", false);
-        containerShiftClickEnabled = getConfig().getBoolean("triggers.container-shift-right-click", true);
-        joinHintEnabled = getConfig().getBoolean("join-hint.enabled", true);
-        joinHintDelayTicks = Math.max(0L, getConfig().getLong("join-hint.delay-seconds", 120L)) * 20L;
-        defaultReverseOrder = getConfig().getBoolean("reverse-order", false);
     }
 
     public SortMode modeOf(UUID playerId) {

@@ -2,7 +2,7 @@
 prefix: '<#B3E342>[<#DFFFAC>Sorting<#B3E342>] '
 
 messages:
-  no-permission: '<#CACACA>You do not have <#E34242>permission<#CACACA> to do that.'
+  no-permission: '<#CACACA>You do not have <#E34242>permission<#CACACA>.'
   player-only: '<#E34242>Only players<#CACACA> can use this command.'
   sorted: '<#CACACA>Inventory was <#B3E342>sorted<#CACACA> using <#E3B341>%mode%<#CACACA> mode.'
   empty: '<#CACACA>There is nothing to sort.'
@@ -13,4 +13,5 @@ messages:
   mode-set: '<#CACACA>Sorting mode was <#B3E342>updated<#CACACA> to <#E3B341>%mode%<#CACACA>.'
   hint: '<#E3B341>[Hint] <#CACACA>Shift + right-click a container to sort it.'
   reload-success: '<#CACACA>Configuration <#B3E342>reloaded<#CACACA>.'
+  reload-failed: '<#CACACA>Configuration reload <#E34242>failed<#CACACA>. Check console for details.'
   usage: '<#CACACA>Usage: <#E3B341>/sort [mode <category|material|alphabetical|quantity|durability|reverse>|reload]'
