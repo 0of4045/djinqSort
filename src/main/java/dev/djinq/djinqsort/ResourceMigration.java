@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,12 +22,23 @@ final class ResourceMigration {
             return;
         }
 
-        YamlConfiguration current = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration current = new YamlConfiguration();
+        try {
+            current.load(file);
+        } catch (IOException | InvalidConfigurationException exception) {
+            throw new IllegalStateException("Could not load " + resourceName + ".", exception);
+        }
         YamlConfiguration defaults = loadDefaults(plugin, resourceName);
         boolean changed = false;
 
         for (String path : defaults.getKeys(true)) {
-            if (defaults.isConfigurationSection(path) || current.contains(path)) {
+            if (defaults.isConfigurationSection(path)) {
+                if (current.contains(path) && !current.isConfigurationSection(path)) {
+                    throw new IllegalStateException(resourceName + ": " + path + " must be a section.");
+                }
+                continue;
+            }
+            if (current.contains(path)) {
                 continue;
             }
 
