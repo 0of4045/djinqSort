@@ -3,6 +3,8 @@ package dev.djinq.djinqsort;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,6 +20,9 @@ public final class SortCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            return reload(sender);
+        }
         if (!sender.hasPermission("djinqsort.command")) {
             plugin.messages().send(sender, "no-permission");
             return true;
@@ -28,9 +33,43 @@ public final class SortCommand implements CommandExecutor, TabCompleter {
 
         return switch (args[0].toLowerCase(Locale.ROOT)) {
             case "mode" -> setMode(sender, args);
-            case "reload" -> reload(sender);
             default -> usage(sender);
         };
+    }
+
+    private static List<String> complete(String input, List<String> values) {
+        List<String> matches = new ArrayList<>();
+        for (String value : values) {
+            if (value.toLowerCase(Locale.ROOT).startsWith(input.toLowerCase(Locale.ROOT))) {
+                matches.add(value.toLowerCase(Locale.ROOT));
+            }
+        }
+        return matches;
+    }
+
+    private record SortState(SortMode mode, boolean reverse, String label) {
+    }
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        boolean canChangeMode = sender.hasPermission("djinqsort.command") && sender.hasPermission("djinqsort.mode");
+        if (args.length == 1) {
+            List<String> options = new ArrayList<>();
+            if (canChangeMode) {
+                options.add("mode");
+            }
+            if (sender.hasPermission("djinqsort.reload")) {
+                options.add("reload");
+            }
+            return complete(args[0], options);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("mode") && canChangeMode) {
+            List<String> modes = new ArrayList<>();
+            for (SortMode mode : SortMode.values()) {
+                modes.add(mode.name());
+            }
+            return complete(args[1], modes);
+        }
+        return List.of();
     }
 
     private boolean sortPlayerInventory(CommandSender sender) {
@@ -57,16 +96,16 @@ public final class SortCommand implements CommandExecutor, TabCompleter {
         }
         SortMode mode = SortMode.parse(args[1]);
         if (mode == null) {
-            plugin.messages().send(sender, "invalid-mode", java.util.Map.of("mode", args[1]));
+            plugin.messages().send(sender, "invalid-mode", Map.of("mode", args[1]));
             return true;
         }
         if (mode == SortMode.REVERSE) {
             plugin.toggleReverseOrder(player.getUniqueId());
-            plugin.messages().send(sender, "mode-set", java.util.Map.of("mode", state(player).label()));
+            plugin.messages().send(sender, "mode-set", Map.of("mode", state(player).label()));
             return true;
         }
         plugin.setMode(player.getUniqueId(), mode);
-        plugin.messages().send(sender, "mode-set", java.util.Map.of("mode", mode.name()));
+        plugin.messages().send(sender, "mode-set", Map.of("mode", mode.name()));
         return true;
     }
 
@@ -86,7 +125,7 @@ public final class SortCommand implements CommandExecutor, TabCompleter {
 
     private void sendResult(CommandSender sender, InventorySorter.Result result, String mode) {
         switch (result) {
-            case SORTED -> plugin.messages().send(sender, "sorted", java.util.Map.of("mode", mode));
+            case SORTED -> plugin.messages().send(sender, "sorted", Map.of("mode", mode));
             case EMPTY -> plugin.messages().send(sender, "empty");
             case UNSUPPORTED -> plugin.messages().send(sender, "player-inventory-disabled");
             case BUSY -> plugin.messages().send(sender, "sorting-busy");
@@ -100,27 +139,4 @@ public final class SortCommand implements CommandExecutor, TabCompleter {
         return new SortState(mode, reverse, reverse ? mode.name() + " (REVERSE)" : mode.name());
     }
 
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) {
-            return complete(args[0], List.of("mode", "reload"));
-        }
-        if (args.length == 2 && args[0].equalsIgnoreCase("mode")) {
-            return complete(args[1], java.util.Arrays.stream(SortMode.values()).map(Enum::name).toList());
-        }
-        return List.of();
-    }
-
-    private static List<String> complete(String input, List<String> values) {
-        List<String> matches = new ArrayList<>();
-        for (String value : values) {
-            if (value.toLowerCase(Locale.ROOT).startsWith(input.toLowerCase(Locale.ROOT))) {
-                matches.add(value.toLowerCase(Locale.ROOT));
-            }
-        }
-        return matches;
-    }
-
-    private record SortState(SortMode mode, boolean reverse, String label) {
-    }
 }

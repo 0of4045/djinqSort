@@ -3,22 +3,21 @@ package dev.djinq.djinqsort;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 
 public final class SortListener implements Listener {
     private final DjinqSort plugin;
@@ -26,35 +25,6 @@ public final class SortListener implements Listener {
 
     public SortListener(DjinqSort plugin) {
         this.plugin = plugin;
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player) || !isEmpty(event.getCursor())) {
-            return;
-        }
-
-        if (event.getClick() != ClickType.MIDDLE || !plugin.middleClickEnabled()
-                || !player.hasPermission("djinqsort.middleclick")) {
-            return;
-        }
-
-        Inventory clicked = event.getClickedInventory();
-        if (clicked == null) {
-            return;
-        }
-        boolean playerInventory = clicked.equals(player.getInventory()) && event.getSlot() >= 9 && event.getSlot() < 36;
-        boolean container = clicked.equals(event.getView().getTopInventory()) && plugin.supportsContainer(clicked);
-        if (!playerInventory && !container) {
-            return;
-        }
-
-        UUID playerId = player.getUniqueId();
-        if (!queued.add(playerId)) {
-            return;
-        }
-        event.setCancelled(true);
-        Bukkit.getScheduler().runTask(plugin, () -> sort(player, clicked, playerInventory, playerId));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -80,7 +50,17 @@ public final class SortListener implements Listener {
         if (!queued.add(playerId)) {
             return;
         }
-        Bukkit.getScheduler().runTask(plugin, () -> sort(player, target, false, playerId));
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (event.useInteractedBlock() == Result.DENY || !player.isSneaking()
+                    || !player.getWorld().equals(block.getWorld())
+                    || !block.getWorld().isChunkLoaded(block.getX() >> 4, block.getZ() >> 4)
+                    || !(block.getState() instanceof InventoryHolder current)
+                    || !current.getInventory().equals(target)) {
+                queued.remove(playerId);
+                return;
+            }
+            sort(player, target, playerId);
+        });
     }
 
     @EventHandler
@@ -104,24 +84,16 @@ public final class SortListener implements Listener {
         plugin.removePlayer(playerId);
     }
 
-    private void sort(Player player, Inventory target, boolean playerInventory, UUID playerId) {
+    private void sort(Player player, Inventory target, UUID playerId) {
         queued.remove(playerId);
         if (!player.isOnline() || player.isDead()) {
             return;
         }
-        if (!playerInventory && !player.getOpenInventory().getTopInventory().equals(target)) {
+        if (!plugin.containerShiftClickEnabled() || !player.hasPermission("djinqsort.containerclick")) {
             return;
         }
         SortMode mode = plugin.modeOf(playerId);
         boolean reverse = plugin.reverseOrderOf(playerId);
-        if (playerInventory) {
-            plugin.sorter().sortPlayerInventory(player, mode, reverse);
-        } else {
-            plugin.sorter().sortContainer(target, mode, reverse);
-        }
-    }
-
-    private static boolean isEmpty(ItemStack item) {
-        return item == null || item.getType().isAir() || item.getAmount() <= 0;
+        plugin.sorter().sortContainer(target, mode, reverse);
     }
 }

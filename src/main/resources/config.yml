@@ -11,7 +11,7 @@ reverse-order: false
 player-inventory:
   enabled: true
 
-# containers that can be sorted with shift + right-click or shortcuts
+# containers that can be sorted with shift + right-click
 containers:
   chest: true
   barrel: true
@@ -20,9 +20,8 @@ containers:
   dropper: true
   dispenser: true
 
-# click shortcuts ~ permissions are still required
+# container shortcut ~ permission is still required
 triggers:
-  middle-click: true
   container-shift-right-click: true
 
 # join hint ~ sent only to players with container permission

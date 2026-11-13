@@ -1,10 +1,8 @@
-<img width="1024" height="162" alt="djinqSort" src="https://github.com/user-attachments/assets/e7aefd03-a4f4-4156-84f4-4266fd9bf893" />
-
 # djinqSort
 
 A small and lightweight inventory sorting plugin for Paper servers.
 
-Sort the 27 main inventory slots with commands, or sort an open supported container with middle-click. You can also sort supported containers with Shift + right-click. Sorting keeps item metadata intact and never touches the 9 hotbar slots, armor, or offhand.
+Sort the 27 main inventory slots with commands, or sort supported containers with Shift + right-click. Sorting keeps item metadata intact and never touches the 9 hotbar slots, armor, or offhand.
 
 Made by djinq ~ [djinq.dev](https://djinq.dev)
 
@@ -29,9 +27,8 @@ Made by djinq ~ [djinq.dev](https://djinq.dev)
 | --- | --- |
 | `djinqsort.command` | Allows `/sort`. |
 | `djinqsort.mode` | Allows `/sort mode`. |
-| `djinqsort.middleclick` | Allows middle-click sorting. |
 | `djinqsort.containerclick` | Allows Shift + right-click container sorting. |
-| `djinqsort.reload` | Allows `/sort reload`. |
+| `djinqsort.reload` | Allows `/sort reload` without requiring `djinqsort.command`. |
 
 ## Configuration
 
@@ -41,9 +38,11 @@ In `config.yml`, you can edit:
 - `reverse-order` ~ whether sorting starts in reverse order.
 - `player-inventory.enabled` ~ enables or disables main inventory sorting.
 - `containers` ~ which standard storage containers can be sorted.
-- `triggers` ~ enables each container shortcut separately.
+- `triggers.container-shift-right-click` ~ enables or disables the container shortcut.
 - `join-hint` ~ controls the delayed container sorting hint.
 
 `messages.yml` contains one `prefix` setting. It is automatically added to command messages, while click sorting stays quiet.
+
+Existing customized settings and messages are preserved. Missing defaults are added on startup, with a backup before changes.
 
 Built for Paper 1.21.11 through 26.3. Use Java 21 for Paper 1.21.11, or Java 25 for Paper 26.1+.

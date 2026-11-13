@@ -1,5 +1,5 @@
 name: djinqSort
-version: 1.0.5
+version: 2.0.0
 main: dev.djinq.djinqsort.DjinqSort
 api-version: '1.21'
 description: Lightweight inventory sorting for Paper.
@@ -10,7 +10,6 @@ commands:
   sort:
     description: Sort your main inventory.
     usage: /sort [mode <mode>|reload]
-    permission: djinqsort.command
 
 permissions:
   djinqsort.command:
@@ -18,9 +17,6 @@ permissions:
     default: true
   djinqsort.mode:
     description: Allows /sort mode.
-    default: true
-  djinqsort.middleclick:
-    description: Allows sorting through middle-click.
     default: true
   djinqsort.containerclick:
     description: Allows sorting containers through shift + right-click.

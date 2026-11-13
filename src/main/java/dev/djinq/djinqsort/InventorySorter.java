@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -48,8 +49,10 @@ public final class InventorySorter {
                 return Result.EMPTY;
             }
 
-            entries.sort(comparator(mode, reverse));
-            ItemStack[] sorted = sortedSlots(entries, before.length);
+            if (mode != SortMode.QUANTITY) {
+                entries.sort(comparator(mode, reverse));
+            }
+            ItemStack[] sorted = sortedSlots(entries, before.length, mode, reverse);
             if (sorted == null || !matches(inventory, firstSlot, before)) {
                 return Result.FAILED;
             }
@@ -90,29 +93,37 @@ public final class InventorySorter {
 
     private static Comparator<Entry> comparator(SortMode mode, boolean reverse) {
         Comparator<Entry> comparator = switch (mode) {
-            case CATEGORY -> Comparator.comparingInt((Entry entry) -> category(entry.item().getType()))
-                    .thenComparing(entry -> materialName(entry.item()));
-            case ALPHABETICAL -> Comparator.comparing((Entry entry) -> itemName(entry.item()), String.CASE_INSENSITIVE_ORDER)
-                    .thenComparing(entry -> materialName(entry.item()));
-            case QUANTITY -> Comparator.comparingInt((Entry entry) -> entry.item().getAmount()).reversed()
-                    .thenComparing(entry -> materialName(entry.item()));
-            case DURABILITY -> Comparator.comparingInt((Entry entry) -> remainingDurability(entry.item())).reversed()
-                    .thenComparing(entry -> materialName(entry.item()));
+            case CATEGORY -> Comparator.comparingInt((Entry entry) -> category(entry.item().getType()));
+            case ALPHABETICAL -> Comparator.comparing(
+                    (Entry entry) -> itemName(entry.item()), String.CASE_INSENSITIVE_ORDER);
+            case QUANTITY -> Comparator.comparingInt((Entry entry) -> entry.item().getAmount()).reversed();
+            case DURABILITY -> Comparator.comparingInt((Entry entry) -> remainingDurability(entry.item())).reversed();
             case MATERIAL, REVERSE -> Comparator.comparing(entry -> materialName(entry.item()));
         };
+        if (mode != SortMode.MATERIAL && mode != SortMode.REVERSE) {
+            comparator = comparator.thenComparing(entry -> materialName(entry.item()));
+        }
         if (reverse) {
             comparator = comparator.reversed();
         }
         return comparator.thenComparingInt(Entry::index);
     }
 
-    private static ItemStack[] sortedSlots(List<Entry> entries, int size) {
+    private static ItemStack[] sortedSlots(List<Entry> entries, int size, SortMode mode, boolean reverse) {
         List<ItemStack> stacks = new ArrayList<>();
         for (Entry entry : entries) {
             addStack(stacks, entry.item().clone());
         }
         if (stacks.size() > size) {
             return null;
+        }
+        if (mode == SortMode.QUANTITY) {
+            Comparator<ItemStack> quantities = Comparator.comparingInt(ItemStack::getAmount).reversed();
+            quantities = quantities.thenComparing(InventorySorter::materialName);
+            if (reverse) {
+                quantities = quantities.reversed();
+            }
+            stacks.sort(quantities);
         }
         ItemStack[] sorted = new ItemStack[size];
         for (int index = 0; index < stacks.size(); index++) {
